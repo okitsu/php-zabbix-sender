@@ -1,9 +1,9 @@
 <?php
 
-require_once('Zabbix/Sender.php');
-require_once('Zabbix/Agent/Config.php');
+require_once('Net/Zabbix/Sender.php');
+require_once('Net/Zabbix/Agent/Config.php');
 
-$agentConfig = new Zabbix_Agent_Config();
+$agentConfig = new Net_Zabbix_Agent_Config();
 $sender = new Zabbix_Sender();
 
 $sender->importAgentConfig($agentConfig);

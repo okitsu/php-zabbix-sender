@@ -1,1 +1,6 @@
-pure php zabbix-sender
+pure PHP livrary for Zabbix Sender
+
+Requirement
+    PHP5.3
+    PHPUnit
+

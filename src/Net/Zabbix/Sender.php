@@ -1,9 +1,12 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
-#require_once('Agent/Config.php');
+namespace Net\Zabbix;
 
-# Default configuration
+/**
+    define default configuration
+ */
+
 if(!defined('ZABBIX_SENDER_DEFAULT_SERVERNAME')) {
     define('ZABBIX_SENDER_DEFAULT_SERVERNAME','localhost',true);
 }
@@ -22,14 +25,14 @@ if(!defined('ZABBIX_SENDER_PROTOCOL_VERSION')) {
     define('ZABBIX_SENDER_PROTOCOL_VERSION',1,true);
 }
 
-class Zabbix_Sender {
-    
+class Sender {
+   
     var $_servername = ZABBIX_SENDER_DEFAULT_SERVERNAME;
     var $_serverport = ZABBIX_SENDER_DEFAULT_SERVERPORT;
     var $_timeout    = ZABBIX_SENDER_DEFAULT_CONNECTION_TIMEOUT;
     var $_data; 
 
-    function Zabbix_Sender($servername = null,$serverport = null)
+    function __construct($servername = null,$serverport = null)
     {
         if(! is_null($servername)){
             $this->_servername = $servername;
@@ -48,7 +51,7 @@ class Zabbix_Sender {
         );
     }
 
-    function importAgentConfig(Zabbix_Agent_Config $agentConfig){
+    function importAgentConfig(Net\Zabbix\Agent\Config $agentConfig){
         $config = $agentConfig->getAgentConfig();
         $this->_servername = $config{'Server'}; 
         $this->_serverport = $config{'ServerPort'}; 
@@ -68,6 +71,11 @@ class Zabbix_Sender {
     function addData($hostname=null,$key=null,$value=null)
     {
         array_push($this->_data{"data"},array("host"=>$hostname,"value"=>$value,"key"=>$key));
+    }
+    
+    function getDataArray()
+    {
+        return $this->_data{"data"};
     }
 
     function send()

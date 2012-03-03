@@ -1,10 +1,10 @@
 <?php
 
-class Zabbix_Agent_ConfigTest extends PHPUnit_Framework_TestCase
+class Zabbix_Agent_ConfigTest extends \PHPUnit_Framework_TestCase
 {
 	public function setUp()
 	{
-		$this->config = new Zabbix_Agent_Config;
+		$this->config = new \Net\Zabbix\Agent\Config;
 	}
 	
 	public function test_set_getConfigFilename()
