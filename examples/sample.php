@@ -1,13 +1,28 @@
 <?php
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
-require_once('Net/Zabbix/Sender.php');
-require_once('Net/Zabbix/Agent/Config.php');
+error_reporting(E_ALL | E_STRICT);
+$src = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'src';
+set_include_path( get_include_path() . PATH_SEPARATOR . $src);
 
-$agentConfig = new Net_Zabbix_Agent_Config();
-$sender = new Zabbix_Sender();
+function my_autoload($className){
+    $src = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'src';
+    $replaces = array(
+            '_'  => DIRECTORY_SEPARATOR,
+            '\\' => DIRECTORY_SEPARATOR,
+            '.'  => '', 
+        );
+    $classPath = str_replace(array_keys($replaces),array_values($replaces),$className);
+    $fileName = $src . '/' . $classPath . '.php';
 
-$sender->importAgentConfig($agentConfig);
-$sender->addData("localhost","custom.string1","value1");
-$sender->addData("localhost","custom.string1","value1");
+    if(is_file($fileName)){
+        require_once($fileName);
+    } 
+} 
+
+spl_autoload_register('my_autoload');
+
+$sender = new \Net\Zabbix\Sender;
+$sender->addData('localhost','custom.string1','value1');
+$sender->addData('localhost','custom.string1','value2');
 $sender->send();
-
