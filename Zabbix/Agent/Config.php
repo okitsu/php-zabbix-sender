@@ -23,7 +23,11 @@ class Zabbix_Agent_Config
 
     function setConfigFilename($filename){
         $this->_config_filename = $filename;
-    }   
+    }
+    
+    function getConfigFilename(){
+        return $this->_config_filename;
+    } 
  
     static function loadAgentConfig($filename=null){
         $config_array = array();

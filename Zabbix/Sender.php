@@ -1,7 +1,7 @@
 <?php
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
-require_once('Agent/Config.php');
+#require_once('Agent/Config.php');
 
 # Default configuration
 if(!defined('ZABBIX_SENDER_DEFAULT_SERVERNAME')) {
@@ -60,6 +60,10 @@ class Zabbix_Sender {
         }
         return $this->_timeout;
     }   
+
+    function getTimeout(){
+        return $this->_timeout;
+    }
  
     function addData($hostname=null,$key=null,$value=null)
     {
