@@ -63,7 +63,7 @@ class Sender {
         );
     }
 
-    function importAgentConfig(Net\Zabbix\Agent\Config $agentConfig){
+    function importAgentConfig(Agent\Config $agentConfig){
         $config = $agentConfig->getAgentConfig();
         $this->_servername = $config{'Server'}; 
         $this->_serverport = $config{'ServerPort'}; 
@@ -100,7 +100,6 @@ class Sender {
                         );
         }
     }
-    
     
     function getDataArray()
     {
@@ -180,6 +179,7 @@ class Sender {
     function send()
     {
         $recvData = "";
+        $succeed = false;
         $sendData = $this->_buildSendData();
         $sock = fsockopen($this->_servername,intval($this->_serverport),$errno,$errmsg,$this->_timeout);
         fputs($sock,$sendData);
@@ -200,11 +200,12 @@ class Sender {
             $this->_lastTotal           = $parsedInfo{'total'};
             if($responseArray{'response'} == "success"){
                 $this->initData();
-                return true;
+                $succeed = true;
             }
+            return $succeed;
         }
         $this->_clearLastResponseData();
-        return false;
+        return $succeed;
     }
 }
 
