@@ -20,13 +20,24 @@ class Zabbix_SenderTest extends \PHPUnit_Framework_TestCase
 		$this->assertArrayHasKey('data',$this->sender->_createDataTemplate() );	
 	}
 	
-	public function test_addData()
-	{
-		$sender = new \Net\Zabbix\Sender;
+	function _addData(\Net\Zabbix\Sender $sender){
 		$sender->addData("hostname1","key1","value1");	
 		$sender->addData("hostname2","key2","value2");
-		$dataArray = $sender->getDataArray();
+	}
+	
+	public function test_addData()
+	{
+		$this->_addData($this->sender);
+		$dataArray = $this->sender->getDataArray();
 		$this->assertCount(2,$dataArray);
+	}
+
+	public function test_unsetData()
+	{
+		$this->_addData($this->sender);
+		$this->sender->initData();
+		$dataArray = $this->sender->getDataArray();
+		$this->assertCount(0,$dataArray);
 	}
 
 }
