@@ -13,7 +13,7 @@ function my_autoload($className){
             '.'  => '', 
         );
     $classPath = str_replace(array_keys($replaces),array_values($replaces),$className);
-    $fileName = $src . '/' . $classPath . '.php';
+    $fileName = $src . DIRECTORY_SEPARATOR . $classPath . '.php';
 
     if(is_file($fileName)){
         require_once($fileName);
