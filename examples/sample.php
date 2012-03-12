@@ -76,3 +76,38 @@ if($result){
 }
 
 
+/*
+    method chain pattern
+ */
+$sender = new \Net\Zabbix\Sender();
+$result = $sender
+            ->setServerName('localhost')
+            ->setServerPort(10051)
+            ->setTimeout(10)
+            ->addData($undefined_hostname,'custom.string1','string0')
+            ->addData($defined_hostname,'custom.string1','string1')
+            ->addData($defined_hostname,'custom.string1','string1')
+            ->addData($defined_hostname,'custom.string1','string1')
+            ->send();
+if($result){
+    $info = $sender->getLastResponseInfo();
+    $data = $sender->getLastResponseArray();
+    echo "request result: success\n";
+    echo "response info: $info\n";
+    echo "response data:\n";
+    var_dump($data);
+
+    $processed  = $sender->getLastProcessed();
+    $failed     = $sender->getLastFailed();
+    $total      = $sender->getLastTotal();
+    $spent      = $sender->getLastSpent();
+    echo "parsedInfo: processed = $processed\n";
+    echo "parsedInfo: failed    = $failed\n";
+    echo "parsedInfo: total     = $total\n";
+    echo "parsedInfo: spent     = $spent\n";
+
+}else{
+    echo "request result: failed\n";
+}
+
+
