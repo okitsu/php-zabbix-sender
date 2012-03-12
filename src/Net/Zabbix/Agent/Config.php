@@ -35,7 +35,7 @@ class Config
     function getServerPort(){
         $return_value = null;
         if( array_key_exists('ServerPort',$this->_config_array)
-            and is_numeric($this->_config_array('ServerPort')) )
+            and is_numeric($this->_config_array{'ServerPort'}) )
         {
             $return_value = intval($this->_config_array{'ServerPort'}); 
         }
