@@ -41,7 +41,17 @@ class Zabbix_SenderTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException Net\Zabbix\SenderNetworkException
      */
-    public function test_send_fail()
+    public function test_send_fail_invalid_hostname()
+    {
+        $this->sender->setServerName('invalid-hostname'); 
+        $result = $this->sender->send();
+        $this->assertFalse($result);
+    }
+    
+    /**
+     * @expectedException Net\Zabbix\SenderNetworkException
+     */
+    public function test_send_fail_invalid_port()
     {
         $this->sender->setServerPort(11111); 
         $result = $this->sender->send();
