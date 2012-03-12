@@ -35,7 +35,7 @@ class Config
         $config_array = array();
         if( isset($filename) and is_readable($filename) ){
             $config_lines = file($filename);
-            $config_lines = preg_grep("/^\s*[A-Za-z].+/",$config_lines);
+            $config_lines = preg_grep("/^\s*[A-Za-z].+\=.+/",$config_lines);
             foreach($config_lines as $line_num => $line){
                 list($key,$value) = explode("=",$line,2);
                 $key = trim($key);
