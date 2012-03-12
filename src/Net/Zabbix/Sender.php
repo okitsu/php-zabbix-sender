@@ -28,6 +28,13 @@ if(!defined('ZABBIX_SENDER_PROTOCOL_VERSION')) {
     define('ZABBIX_SENDER_PROTOCOL_VERSION',1,true);
 }
 
+/* base exception */
+
+class SenderException           extends \Exception{}
+class SenderRuntimeException    extends \RuntimeException{}
+class SenderNetworkException    extends SenderRuntimeException{}
+class SenderProtocolException   extends SenderRuntimeException{}
+
 class Sender {
    
     private $_servername = ZABBIX_SENDER_DEFAULT_SERVERNAME;
@@ -179,21 +186,105 @@ class Sender {
         $this->_lastTotal           = null;
     }
 
-    function send()
-    {
-        $recvData = "";
-        $succeed = false;
-        $sendData = $this->_buildSendData();
-        $sock = fsockopen($this->_servername,intval($this->_serverport),$errno,$errmsg,$this->_timeout);
-        fputs($sock,$sendData);
-        while( !feof($sock) ){
-            $recvData .= fgets($sock,8192);
+    private function _close(){
+        if($this->_socket){
+            fclose($this->_socket);
         }
-        fclose($sock);
+    }
+
+    /**
+     * connect to Zabbix Server
+     * @throws Net\Zabbix\SenderNetworkException
+     *
+     */
+    private function _connect(){
+        $this->_socket = @fsockopen( $this->_servername,
+                                        intval($this->_serverport),
+                                        $errno,
+                                        $errmsg,
+                                        $this->_timeout);
+        if(! $this->_socket){
+            throw new SenderNetworkException(sprintf('%s,%s',$errno,$errmsg));
+        }
+    }
+    
+    /**
+     * write data to socket
+     * @throws Net\Zabbix\SenderNetworkException
+     *
+     */
+    private function _write($socket,$data){
+        if(! $socket){
+            throw new SenderNetworkException('socket was not writable,connect failed.');
+        }
+        $totalWrote = 0;
+        $length = strlen($data);
+        while( $totalWrote < $length ){
+            $writeSize = @fwrite($socket,$data);
+            if($writeSize === false){
+                return false;
+            }else{
+                $totalWrote += $writeSize;
+                $data = substr($data,$writeSize);
+            }
+        }
+        return $totalWrote; 
+    }
+
+    /**
+     * read data from socket
+     * @throws Net\Zabbix\SenderNetworkException
+     *
+     */ 
+    private function _read($socket){
+        if(! $socket){
+            throw new SenderNetworkException('socket was not readable,connect failed.');
+        }
+        $recvData = "";
+        while(!feof($socket)){
+            $buffer = fread($socket,8192);
+            if($buffer === false){
+                return false; 
+            }
+            $recvData .= $buffer;
+        }
+        return $recvData; 
+    }
+    
+
+    /**
+     * main 
+     * @throws Net\Zabbix\SenderNetworkException
+     * @throws Net\Zabbix\SenderProtocolException
+     *
+     */ 
+    function send(){
+        $sendData = $this->_buildSendData();
+        $datasize = strlen($sendData);
+ 
+        $this->_connect();
+      
+        /* send data to zabbix server */ 
+        $sentsize = $this->_write($this->_socket,$sendData);
+        if($sentsize === false or $sentsize != $datasize){
+            throw new SenderNetworkException('cannot receive response');
+        }
+        
+        /* receive data from zabbix server */ 
+        $recvData = $this->_read($this->_socket);
+        if($recvData === false){
+            throw new SenderNetworkException('cannot receive response');
+        }
+        
+        $this->_close();
+        
         $recvProtocolHeader = substr($recvData,0,4);
         if( $recvProtocolHeader == "ZBXD"){
             $responseData               = substr($recvData,13);
             $responseArray              = json_decode($responseData,true);
+            if(is_null($responseArray)){
+                throw new SenderProtocolException('invalid json data in receive data'); 
+            }
             $this->_lastResponseArray   = $responseArray;
             $this->_lastResponseInfo    = $responseArray{'info'}; 
             $parsedInfo                 = $this->_parseResponseInfo($this->_lastResponseInfo); 
@@ -203,12 +294,14 @@ class Sender {
             $this->_lastTotal           = $parsedInfo{'total'};
             if($responseArray{'response'} == "success"){
                 $this->initData();
-                $succeed = true;
+            }else{
+                return false; 
             }
-            return $succeed;
+            return true;
+        }else{
+            $this->_clearLastResponseData();
+            throw new SenderProtocolException('invalid protocol header in receive data'); 
         }
-        $this->_clearLastResponseData();
-        return $succeed;
     }
 }
 

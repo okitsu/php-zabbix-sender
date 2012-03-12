@@ -38,6 +38,9 @@ class Zabbix_SenderTest extends \PHPUnit_Framework_TestCase
         $this->assertCount(0,$dataArray);
     }
 
+    /**
+     * @expectedException Net\Zabbix\SenderNetworkException
+     */
     public function test_send_fail()
     {
         $this->sender->setServerPort(11111); 
