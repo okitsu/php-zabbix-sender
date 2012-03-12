@@ -17,7 +17,10 @@ if(!defined('ZABBIX_SENDER_DEFAULT_CONNECTION_TIMEOUT')) {
     define('ZABBIX_SENDER_DEFAULT_CONNECTION_TIMEOUT',30,true);
 }
 
-# ZABBIX Sender Protocol
+/**
+ ZABBIX Sender Protocol
+ */
+
 if(!defined('ZABBIX_SENDER_PROTOCOL_HEADER_STRING')) {
     define('ZABBIX_SENDER_PROTOCOL_HEADER_STRING','ZBXD',true);
 }
@@ -27,38 +30,30 @@ if(!defined('ZABBIX_SENDER_PROTOCOL_VERSION')) {
 
 class Sender {
    
-    var $_servername = ZABBIX_SENDER_DEFAULT_SERVERNAME;
-    var $_serverport = ZABBIX_SENDER_DEFAULT_SERVERPORT;
-    var $_timeout    = ZABBIX_SENDER_DEFAULT_CONNECTION_TIMEOUT;
+    private $_servername = ZABBIX_SENDER_DEFAULT_SERVERNAME;
+    private $_serverport = ZABBIX_SENDER_DEFAULT_SERVERPORT;
+    private $_timeout    = ZABBIX_SENDER_DEFAULT_CONNECTION_TIMEOUT;
 
-    var $_lastResponseInfo  = null;
-    var $_lastResponseArray = null;
-    var $_lastProcessed     = null;
-    var $_lastFailed        = null;
-    var $_lastSpent         = null;
-    var $_lastTotal         = null;
+    private $_lastResponseInfo  = null;
+    private $_lastResponseArray = null;
+    private $_lastProcessed     = null;
+    private $_lastFailed        = null;
+    private $_lastSpent         = null;
+    private $_lastTotal         = null;
 
-    var $_data; 
+    private $_socket;
+    private $_data; 
 
     function __construct($servername = null,$serverport = null)
     {
-        if( isset($servername) ){
-            $this->_servername = $servername;
-        }
-        if( isset($serverport) and is_numeric($serverport) ){
-            $this->_serverport = intval($serverport);
-        }
+        $this->setServerName($servername);
+        $this->setServerPort($serverport);
         $this->initData();
     }
     
     function initData()
     {
-        $this->_data = $this->_createDataTemplate();
-    }
-
-    function _createDataTemplate()
-    {
-        return array(
+        $this->_data = array(
             "request" => "sender data",
             "data" => array()
         );
@@ -66,20 +61,30 @@ class Sender {
 
     function importAgentConfig(Agent\Config $agentConfig)
     {
-        $server = $agentConfig->getServer();
-        $port   = $agentConfig->getServerPort();
-        if( isset($server) ){
-            $this->_servername = $server;
+        $this->setServerName($agentConfig->getServer());
+        $this->setServerPort($agentConfig->getServerPort());
+        return $this;
+    }
+    
+    function setServerName($servername=null){
+        if( isset($servername) ){
+            $this->_servername = $servername;
         }
-        if( isset($port) ){
-            $this->_serverport = $port;
+        return $this;
+    }
+    
+    function setServerPort($serverport=null){
+        if( isset($serverport) ){
+            $this->_serverport = $serverport;
         }
+        return $this;
     }
     
     function setTimeout($timeout=0){
         if( (is_int($timeout) or is_numeric($timeout) ) and intval($timeout) > 0){
             $this->_timeout = $timeout;
         }
+        return $this;
     }   
 
     function getTimeout(){
@@ -93,6 +98,7 @@ class Sender {
             $input{"clock"} = $clock;
         }
         array_push($this->_data{"data"},$input);
+        return $this;
     }
     
     function getDataArray()
@@ -100,7 +106,7 @@ class Sender {
         return $this->_data{"data"};
     }
 
-    function _buildSendData(){
+    private function _buildSendData(){
         $json_data   = json_encode( array_map(
                                         function($t){ return is_string($t) ? utf8_encode($t) : $t; },
                                         $this->_data
@@ -125,8 +131,9 @@ class Sender {
         return ($data_header . $json_data);
     }
 
-    function _parseResponseInfo($info=null){
-        # info: "Processed 1 Failed 1 Total 2 Seconds spent 0.000035"         
+    protected function _parseResponseInfo($info=null){
+        # info: "Processed 1 Failed 1 Total 2 Seconds spent 0.000035"
+        $parsedInfo = null;       
         if(isset($info)){
             list(,$processed,,$failed,,$total,,$spent) = explode(" ",$info);
             $parsedInfo = array(
@@ -135,9 +142,8 @@ class Sender {
                 "total"     => intval($total),
                 "spent"     => floatval($failed),
             );
-            return $parsedInfo;
         }
-        return null;
+        return $parsedInfo;
     }
     
     function getLastResponseInfo(){
@@ -164,7 +170,7 @@ class Sender {
         return $this->_lastTotal;
     }
     
-    function _clearLastResponseData(){
+    private function _clearLastResponseData(){
         $this->_lastResponseInfo    = null;
         $this->_lastResponseArray   = null;
         $this->_lastProcessed       = null;
@@ -172,7 +178,7 @@ class Sender {
         $this->_lastSpent           = null;
         $this->_lastTotal           = null;
     }
- 
+
     function send()
     {
         $recvData = "";

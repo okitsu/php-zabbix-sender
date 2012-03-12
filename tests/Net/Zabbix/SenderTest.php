@@ -1,68 +1,63 @@
 <?php
+/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
 class Zabbix_SenderTest extends \PHPUnit_Framework_TestCase
 {
-	public function setUp()
-	{
-		$this->sender = new Net\Zabbix\Sender('localhost',10051);
-		$agentConfig = new Net\Zabbix\Agent\Config();
-		$this->sender->importAgentConfig($agentConfig);
-	}
-	
-	public function test_set_getTimeout()
-	{
-		$timeout = 99;
-		$this->sender->setTimeout($timeout);
-		$this->assertEquals($timeout,$this->sender->getTimeout());
-	}
-	
-	public function test_createDataTemplate()
-	{
-		$this->assertArrayHasKey('request',$this->sender->_createDataTemplate() );	
-		$this->assertArrayHasKey('data',$this->sender->_createDataTemplate() );	
-	}
-	
-	function _addData(\Net\Zabbix\Sender $sender){
-		$sender->addData("hostname1","key1","value1");	
-		$sender->addData("hostname2","key2","value2");
-		$sender->addData("hostname3","key3","value3",1234567890);
-	}
-	
-	public function test_addData()
-	{
-		$this->_addData($this->sender);
-		$dataArray = $this->sender->getDataArray();
-		$this->assertCount(3,$dataArray);
-	}
+    public function setUp()
+    {
+        $this->sender = new Net\Zabbix\Sender('localhost',10051);
+        $agentConfig = new Net\Zabbix\Agent\Config();
+        $this->sender->importAgentConfig($agentConfig);
+    }
+    
+    public function test_set_getTimeout()
+    {
+        $timeout = 99;
+        $this->sender->setTimeout($timeout);
+        $this->assertEquals($timeout,$this->sender->getTimeout());
+    }
+    
+    function _addData(\Net\Zabbix\Sender $sender){
+        $sender->addData("hostname1","key1","value1");    
+        $sender->addData("hostname2","key2","value2");
+        $sender->addData("hostname3","key3","value3",1234567890);
+    }
+    
+    public function test_addData()
+    {
+        $this->_addData($this->sender);
+        $dataArray = $this->sender->getDataArray();
+        $this->assertCount(3,$dataArray);
+    }
 
-	public function test_unsetData()
-	{
-		$this->_addData($this->sender);
-		$this->sender->initData();
-		$dataArray = $this->sender->getDataArray();
-		$this->assertCount(0,$dataArray);
-	}
-	
-	public function test_send_fail()
-	{
-		$this->sender->_data = array(); 
-		$result = $this->sender->send();
-		$this->assertFalse($result);
-	}
-	
-	public function test_send()
-	{
-		$this->_addData($this->sender);
-		$result = $this->sender->send();
-		$this->assertTrue($result);
-		$this->assertEquals(3,$this->sender->getLastFailed());
-		$this->assertEquals(0,$this->sender->getLastProcessed());
-		$this->assertEquals(3,$this->sender->getLastTotal());
-		$this->assertGreaterThanOrEqual(0.000000001,$this->sender->getLastSpent());
-		$this->assertArrayHasKey('info',$this->sender->getLastResponseArray());
-		$this->assertArrayHasKey('response',$this->sender->getLastResponseArray());
-		$this->assertRegExp('/Processed \d+ Failed \d+ Total \d+ Seconds spent \d+\.\d+/',
-					$this->sender->getLastResponseInfo());
-	}
-	
+    public function test_unsetData()
+    {
+        $this->_addData($this->sender);
+        $this->sender->initData();
+        $dataArray = $this->sender->getDataArray();
+        $this->assertCount(0,$dataArray);
+    }
+
+    public function test_send_fail()
+    {
+        $this->sender->setServerPort(11111); 
+        $result = $this->sender->send();
+        $this->assertFalse($result);
+    }
+    
+    public function test_send()
+    {
+        $this->_addData($this->sender);
+        $result = $this->sender->send();
+        $this->assertTrue($result);
+        $this->assertEquals(3,$this->sender->getLastFailed());
+        $this->assertEquals(0,$this->sender->getLastProcessed());
+        $this->assertEquals(3,$this->sender->getLastTotal());
+        $this->assertGreaterThanOrEqual(0.000000001,$this->sender->getLastSpent());
+        $this->assertArrayHasKey('info',$this->sender->getLastResponseArray());
+        $this->assertArrayHasKey('response',$this->sender->getLastResponseArray());
+        $this->assertRegExp('/Processed \d+ Failed \d+ Total \d+ Seconds spent \d+\.\d+/',
+                                $this->sender->getLastResponseInfo());
+    }
+    
 }
