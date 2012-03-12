@@ -126,15 +126,18 @@ class Sender {
     }
 
     function _parseResponseInfo($info=null){
-        # "Processed 1 Failed 1 Total 2 Seconds spent 0.000035"         
-        list(,$processed,,$failed,,$total,,$spent) = explode(" ",$info);
-        $parsedInfo = array(
+        # info: "Processed 1 Failed 1 Total 2 Seconds spent 0.000035"         
+        if(isset($info)){
+            list(,$processed,,$failed,,$total,,$spent) = explode(" ",$info);
+            $parsedInfo = array(
                 "processed" => intval($processed),
                 "failed"    => intval($failed),
                 "total"     => intval($total),
                 "spent"     => floatval($failed),
             );
-        return $parsedInfo;
+            return $parsedInfo;
+        }
+        return null;
     }
     
     function getLastResponseInfo(){
