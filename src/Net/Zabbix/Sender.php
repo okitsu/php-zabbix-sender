@@ -42,11 +42,11 @@ class Sender {
 
     function __construct($servername = null,$serverport = null)
     {
-        if(! is_null($servername)){
+        if( isset($servername)){
             $this->_servername = $servername;
         }
-        if(! is_null($serverport)){
-            $this->_serverport = $serverport;
+        if( isset($serverport) and is_numeric($serverport) ){
+            $this->_serverport = intval($serverport);
         }
         $this->initData();
     }
@@ -65,12 +65,21 @@ class Sender {
 
     function importAgentConfig(Agent\Config $agentConfig){
         $config = $agentConfig->getAgentConfig();
-        $this->_servername = $config{'Server'}; 
-        $this->_serverport = $config{'ServerPort'}; 
+        if( is_array($config) )
+        {
+            if( array_key_exists('Server',$config) )
+            {
+                $this->_servername = $config{'Server'}; 
+            }
+            if( array_key_exists('ServerPort',$config) )
+            {
+                $this->_serverport = intval($config{'ServerPort'}); 
+            }
+        }
     }
     
     function setTimeout($timeout=0){
-        if(intval($timeout) > 0){
+        if( (is_int($timeout) or is_numeric($timeout) ) and intval($timeout) > 0){
             $this->_timeout = $timeout;
         }
     }   
@@ -81,24 +90,13 @@ class Sender {
  
     function addData($hostname=null,$key=null,$value=null,$clock=null)
     {
-        if(is_null($clock)){
-            array_push($this->_data{"data"},
-                        array(
-                                "host"=>$hostname,
-                                "value"=>$value,
-                                "key"=>$key,
-                            )
-                        );
-        }else{
-            array_push($this->_data{"data"},
-                        array(
-                                "host"=>$hostname,
-                                "value"=>$value,
-                                "key"=>$key,
-                                "clock"=>$clock,
-                            )
-                        );
+        
+        $input = array("host"=>$hostname,"value"=>$value,"key"=>$key);
+        if( isset($clock) )
+        {
+            $input{"clock"} = $clock;
         }
+        array_push($this->_data{"data"},$input);
     }
     
     function getDataArray()
