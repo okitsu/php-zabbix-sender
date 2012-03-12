@@ -16,7 +16,7 @@ class Config
         if( isset($filename) and is_readable($filename) ){
            $this->_config_filename = $filename;
         }
-        $this->_config_array = $this->loadAgentConfig($this->_config_filename);
+        $this->_config_array = $this->_load($this->_config_filename);
     }
     
     function getConfigArray(){
@@ -34,22 +34,20 @@ class Config
     
     function getServerPort(){
         $return_value = null;
-        if( array_key_exists('ServerPort',$this->_config_array) )
+        if( array_key_exists('ServerPort',$this->_config_array)
+            and is_numeric($this->_config_array('ServerPort')) )
         {
-            $return_value = $this->_config_array{'ServerPort'}; 
+            $return_value = intval($this->_config_array{'ServerPort'}); 
         }
         return $return_value;
     }
 
-    function setConfigFilename($filename){
-        $this->_config_filename = $filename;
-    }
-    
-    function getCurrentConfigFilename(){
+    function getCurrentConfigFilename()
+    {
         return $this->_config_filename;
     } 
  
-    static function loadAgentConfig($filename=null){
+    function _load($filename=null){
         $config_array = array();
         if( isset($filename) and is_readable($filename) ){
             $config_lines = file($filename);
