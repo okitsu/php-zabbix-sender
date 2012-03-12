@@ -42,7 +42,7 @@ class Sender {
 
     function __construct($servername = null,$serverport = null)
     {
-        if( isset($servername)){
+        if( isset($servername) ){
             $this->_servername = $servername;
         }
         if( isset($serverport) and is_numeric($serverport) ){
@@ -51,7 +51,8 @@ class Sender {
         $this->initData();
     }
     
-    function initData(){
+    function initData()
+    {
         $this->_data = $this->_createDataTemplate();
     }
 
@@ -63,18 +64,15 @@ class Sender {
         );
     }
 
-    function importAgentConfig(Agent\Config $agentConfig){
-        $config = $agentConfig->getAgentConfig();
-        if( is_array($config) )
-        {
-            if( array_key_exists('Server',$config) )
-            {
-                $this->_servername = $config{'Server'}; 
-            }
-            if( array_key_exists('ServerPort',$config) )
-            {
-                $this->_serverport = intval($config{'ServerPort'}); 
-            }
+    function importAgentConfig(Agent\Config $agentConfig)
+    {
+        $server = $agentConfig->getServer();
+        $port   = $agentConfig->getServerPort();
+        if( isset($server) ){
+            $this->_servername = $server;
+        }
+        if( isset($port) ){
+            $this->_serverport = $port;
         }
     }
     
@@ -90,10 +88,8 @@ class Sender {
  
     function addData($hostname=null,$key=null,$value=null,$clock=null)
     {
-        
         $input = array("host"=>$hostname,"value"=>$value,"key"=>$key);
-        if( isset($clock) )
-        {
+        if( isset($clock) ){
             $input{"clock"} = $clock;
         }
         array_push($this->_data{"data"},$input);
