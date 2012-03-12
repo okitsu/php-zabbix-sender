@@ -19,15 +19,33 @@ class Config
         $this->_config_array = $this->loadAgentConfig($this->_config_filename);
     }
     
-    function getAgentConfig(){
+    function getConfigArray(){
         return $this->_config_array;
     }    
+
+    function getServer(){
+        $return_value = null;
+        if( array_key_exists('Server',$this->_config_array) )
+        {
+            $return_value = $this->_config_array{'Server'}; 
+        }
+        return $return_value;
+    }
+    
+    function getServerPort(){
+        $return_value = null;
+        if( array_key_exists('ServerPort',$this->_config_array) )
+        {
+            $return_value = $this->_config_array{'ServerPort'}; 
+        }
+        return $return_value;
+    }
 
     function setConfigFilename($filename){
         $this->_config_filename = $filename;
     }
     
-    function getConfigFilename(){
+    function getCurrentConfigFilename(){
         return $this->_config_filename;
     } 
  
