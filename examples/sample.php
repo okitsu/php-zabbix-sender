@@ -26,7 +26,9 @@ spl_autoload_register('my_autoload');
 $defined_hostname   = 'localhost';
 $undefined_hostname = 'localhost__';
 
-$sender = new \Net\Zabbix\Sender;
+$agentConfig = new \Net\Zabbix\Agent\Config;
+$sender = new \Net\Zabbix\Sender();
+$sender->importAgentConfig($agentConfig);
 
 ## fail request 
 $sender->addData($undefined_hostname,'custom.string1','string0');
