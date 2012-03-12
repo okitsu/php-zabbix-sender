@@ -13,7 +13,7 @@ class Config
     var $_config_array = array();
      
     function __construct($filename=null){
-        if( !is_null($filename) ){
+        if( isset($filename) and is_readable($filename) ){
            $this->_config_filename = $filename;
         }
         $this->_config_array = $this->loadAgentConfig($this->_config_filename);
@@ -33,13 +33,15 @@ class Config
  
     static function loadAgentConfig($filename=null){
         $config_array = array();
-        $config_lines = file($filename);
-        $config_lines = preg_grep("/^\s*[A-Za-z].+/",$config_lines);
-        foreach($config_lines as $line_num => $line){
-            list($key,$value) = explode("=",$line,2);
-            $key = trim($key);
-            $value = trim($value);
-            $config_array{$key} = $value; 
+        if( isset($filename) and is_readable($filename) ){
+            $config_lines = file($filename);
+            $config_lines = preg_grep("/^\s*[A-Za-z].+/",$config_lines);
+            foreach($config_lines as $line_num => $line){
+                list($key,$value) = explode("=",$line,2);
+                $key = trim($key);
+                $value = trim($value);
+                $config_array{$key} = $value; 
+            }
         }
         return $config_array;
     }
