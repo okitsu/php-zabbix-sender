@@ -15,7 +15,7 @@ function my_autoload($className){
     $classPath = str_replace(array_keys($replaces),array_values($replaces),$className);
     $fileName = $src . DIRECTORY_SEPARATOR . $classPath . '.php';
 
-    if(is_file($fileName)){
+    if(is_readable($fileName)){
         require_once($fileName);
     } 
 } 
