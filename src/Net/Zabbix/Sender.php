@@ -217,18 +217,18 @@ class Sender {
         if(! $socket){
             throw new SenderNetworkException('socket was not writable,connect failed.');
         }
-        $totalWrote = 0;
+        $totalWritten = 0;
         $length = strlen($data);
-        while( $totalWrote < $length ){
+        while( $totalWritten < $length ){
             $writeSize = @fwrite($socket,$data);
             if($writeSize === false){
                 return false;
             }else{
-                $totalWrote += $writeSize;
+                $totalWritten += $writeSize;
                 $data = substr($data,$writeSize);
             }
         }
-        return $totalWrote; 
+        return $totalWritten; 
     }
 
     /**
@@ -294,10 +294,11 @@ class Sender {
             $this->_lastTotal           = $parsedInfo{'total'};
             if($responseArray{'response'} == "success"){
                 $this->initData();
+                return true;
             }else{
+                $this->_clearLastResponseData();
                 return false; 
             }
-            return true;
         }else{
             $this->_clearLastResponseData();
             throw new SenderProtocolException('invalid protocol header in receive data'); 
