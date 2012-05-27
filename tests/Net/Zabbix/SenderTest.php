@@ -1,5 +1,4 @@
 <?php
-/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
 class Zabbix_SenderTest extends \PHPUnit_Framework_TestCase
 {
@@ -39,7 +38,7 @@ class Zabbix_SenderTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException Net\Zabbix\SenderNetworkException
+     * @expectedException Net\Zabbix\Exception\SenderNetworkException
      */
     public function test_send_fail_invalid_hostname()
     {
@@ -49,7 +48,7 @@ class Zabbix_SenderTest extends \PHPUnit_Framework_TestCase
     }
     
     /**
-     * @expectedException Net\Zabbix\SenderNetworkException
+     * @expectedException Net\Zabbix\Exception\SenderNetworkException
      */
     public function test_send_fail_invalid_port()
     {

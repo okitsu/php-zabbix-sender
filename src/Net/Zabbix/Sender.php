@@ -1,45 +1,19 @@
 <?php
-/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
 namespace Net\Zabbix;
 
-/**
-    define default configuration
- */
-
-if(!defined('ZABBIX_SENDER_DEFAULT_SERVERNAME')) {
-    define('ZABBIX_SENDER_DEFAULT_SERVERNAME','localhost',true);
-}
-if(!defined('ZABBIX_SENDER_DEFAULT_SERVERPORT')) {
-    define('ZABBIX_SENDER_DEFAULT_SERVERPORT',10051,true);
-}
-if(!defined('ZABBIX_SENDER_DEFAULT_CONNECTION_TIMEOUT')) {
-    define('ZABBIX_SENDER_DEFAULT_CONNECTION_TIMEOUT',30,true);
-}
-
-/**
- ZABBIX Sender Protocol
- */
-
-if(!defined('ZABBIX_SENDER_PROTOCOL_HEADER_STRING')) {
-    define('ZABBIX_SENDER_PROTOCOL_HEADER_STRING','ZBXD',true);
-}
-if(!defined('ZABBIX_SENDER_PROTOCOL_VERSION')) {
-    define('ZABBIX_SENDER_PROTOCOL_VERSION',1,true);
-}
-
-/* base exception */
-
-class SenderException           extends \Exception{}
-class SenderRuntimeException    extends \RuntimeException{}
-class SenderNetworkException    extends SenderRuntimeException{}
-class SenderProtocolException   extends SenderRuntimeException{}
+use Net\Zabbix\Exception\SenderNetworkException;
+use Net\Zabbix\Exception\SenderProtocolException;
 
 class Sender {
-   
-    private $_servername = ZABBIX_SENDER_DEFAULT_SERVERNAME;
-    private $_serverport = ZABBIX_SENDER_DEFAULT_SERVERPORT;
-    private $_timeout    = ZABBIX_SENDER_DEFAULT_CONNECTION_TIMEOUT;
+
+    private $_servername;
+    private $_serverport;
+
+    private $_timeout = 30;
+
+    private $_protocolHeaderString = 'ZBXD';
+    private $_protocolVersion      = 1;
 
     private $_lastResponseInfo  = null;
     private $_lastResponseArray = null;
@@ -49,9 +23,16 @@ class Sender {
     private $_lastTotal         = null;
 
     private $_socket;
-    private $_data; 
+    private $_data;
 
-    function __construct($servername = null,$serverport = null)
+    /**
+     * __construct
+     *
+     * @param  string  $servername
+     * @param  integer $serverport
+     * @return void
+     */
+    function __construct($servername = 'localhost', $serverport = 10051)
     {
         $this->setServerName($servername);
         $this->setServerPort($serverport);
@@ -73,15 +54,13 @@ class Sender {
         return $this;
     }
     
-    function setServerName($servername=null){
-        if( isset($servername) ){
-            $this->_servername = $servername;
-        }
+    function setServerName($servername){
+        $this->_servername = $servername;
         return $this;
     }
     
-    function setServerPort($serverport=null){
-        if( isset($serverport) ){
+    function setServerPort($serverport){
+        if (is_int($serverport)) {
             $this->_serverport = $serverport;
         }
         return $this;
@@ -97,7 +76,19 @@ class Sender {
     function getTimeout(){
         return $this->_timeout;
     }
- 
+
+    function setProtocolHeaderString($headerString){
+        $this->_protocolHeaderString = $headerString;
+        return $this;
+    }
+
+    function setProtocolVersion($version){
+        if (is_int($version) and $version > 0) {
+            $this->_protocolVersion = $version;
+        }
+        return $this;
+    }
+
     function addData($hostname=null,$key=null,$value=null,$clock=null)
     {
         $input = array("host"=>$hostname,"value"=>$value,"key"=>$key);
@@ -121,11 +112,11 @@ class Sender {
                                 );
         $json_length = strlen($json_data);
         $data_header = pack("aaaaCCCCCCCCC",
-                                substr(ZABBIX_SENDER_PROTOCOL_HEADER_STRING,0,1),
-                                substr(ZABBIX_SENDER_PROTOCOL_HEADER_STRING,1,1),
-                                substr(ZABBIX_SENDER_PROTOCOL_HEADER_STRING,2,1),
-                                substr(ZABBIX_SENDER_PROTOCOL_HEADER_STRING,3,1),
-                                intval(ZABBIX_SENDER_PROTOCOL_VERSION),
+                                substr($this->_protocolHeaderString,0,1),
+                                substr($this->_protocolHeaderString,1,1),
+                                substr($this->_protocolHeaderString,2,1),
+                                substr($this->_protocolHeaderString,3,1),
+                                intval($this->_protocolVersion),
                                 ($json_length & 0xFF),
                                 ($json_length & 0x00FF)>>8,
                                 ($json_length & 0x0000FF)>>16,
@@ -194,7 +185,7 @@ class Sender {
 
     /**
      * connect to Zabbix Server
-     * @throws Net\Zabbix\SenderNetworkException
+     * @throws Net\Zabbix\Exception\SenderNetworkException
      *
      */
     private function _connect(){
@@ -210,7 +201,7 @@ class Sender {
     
     /**
      * write data to socket
-     * @throws Net\Zabbix\SenderNetworkException
+     * @throws Net\Zabbix\Exception\SenderNetworkException
      *
      */
     private function _write($socket,$data){
@@ -233,7 +224,7 @@ class Sender {
 
     /**
      * read data from socket
-     * @throws Net\Zabbix\SenderNetworkException
+     * @throws Net\Zabbix\Exception\SenderNetworkException
      *
      */ 
     private function _read($socket){
@@ -254,8 +245,8 @@ class Sender {
 
     /**
      * main 
-     * @throws Net\Zabbix\SenderNetworkException
-     * @throws Net\Zabbix\SenderProtocolException
+     * @throws Net\Zabbix\Exception\SenderNetworkException
+     * @throws Net\Zabbix\Exception\SenderProtocolException
      *
      */ 
     function send(){

@@ -1,21 +1,18 @@
 <?php
-/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
 namespace Net\Zabbix\Agent;
 
-if(!defined('ZABBIX_AGENT_DEFAULT_CONFIG_FILE')) {
-    define('ZABBIX_AGENT_DEFAULT_CONFIG_FILE','/etc/zabbix/zabbix_agentd.conf',true);
-}
-
 class Config
 {
-    var $_config_filename = ZABBIX_AGENT_DEFAULT_CONFIG_FILE;
-    var $_config_array = array();
+    /* @var string */
+    private $_config_filename;
+    /* @var array */
+    private $_config_array = array();
      
     function __construct($filename=null){
-        if( isset($filename) and is_readable($filename) ){
-           $this->_config_filename = $filename;
-        }
+        $this->_config_filenme = isset($filename) && is_readable($filename)
+            ? $filename : '/etc/zabbix/zabbix_agentd.conf';
+
         $this->_config_array = $this->_load($this->_config_filename);
     }
     
