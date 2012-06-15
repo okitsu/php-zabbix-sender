@@ -1,5 +1,4 @@
 <?php
-/* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4: */
 
 error_reporting(E_ALL | E_STRICT);
 $src = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'src';
