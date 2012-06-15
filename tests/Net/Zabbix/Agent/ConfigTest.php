@@ -4,7 +4,7 @@ class Zabbix_Agent_ConfigTest extends \PHPUnit_Framework_TestCase
 {
 	public function setUp()
 	{
-		$this->config = new \Net\Zabbix\Agent\Config('/etc/zabbix/zabbix_agentd.conf');;
+		$this->config = new \Net\Zabbix\Agent\Config('/etc/zabbix/zabbix_agentd.conf');
 	}
 	
 	public function test_set_getConfigFilename()

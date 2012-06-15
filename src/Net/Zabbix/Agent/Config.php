@@ -10,9 +10,8 @@ class Config
     private $_config_array = array();
      
     function __construct($filename=null){
-        $this->_config_filenme = isset($filename) && is_readable($filename)
+        $this->_config_filename = isset($filename) && is_readable($filename)
             ? $filename : '/etc/zabbix/zabbix_agentd.conf';
-
         $this->_config_array = $this->_load($this->_config_filename);
     }
     
