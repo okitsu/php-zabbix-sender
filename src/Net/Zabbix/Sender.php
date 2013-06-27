@@ -133,12 +133,12 @@ class Sender {
         # info: "Processed 1 Failed 1 Total 2 Seconds spent 0.000035"
         $parsedInfo = null;       
         if(isset($info)){
-            list(,$processed,,$failed,,$total,,$spent) = explode(" ",$info);
+            list(,$processed,,$failed,,$total,,,$spent) = explode(" ",$info);
             $parsedInfo = array(
                 "processed" => intval($processed),
                 "failed"    => intval($failed),
                 "total"     => intval($total),
-                "spent"     => floatval($failed),
+                "spent"     => $spent,
             );
         }
         return $parsedInfo;
