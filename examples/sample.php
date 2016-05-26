@@ -1,7 +1,7 @@
 <?php
 
 error_reporting(E_ALL | E_STRICT);
-require_once __DIR__ . '/vendor/autoload.php'; // using composer.phar
+require_once __DIR__ . '/../vendor/autoload.php'; // using composer.phar
 
 $defined_hostname = 'localhost';
 $undefined_hostname = 'localhost__';
@@ -10,25 +10,25 @@ $agentConfig = new \Net\Zabbix\Agent\Config;
 $sender = new \Net\Zabbix\Sender();
 $sender->importAgentConfig($agentConfig);
 
-## fail request 
+## fail request
 $sender->addData($undefined_hostname, 'custom.string1', 'string0');
 
 ## defined host
 # string
 $sender->addData($defined_hostname, 'custom.string1', 'string1');
 $sender->addData($defined_hostname, 'custom.string1', 'string2');
-# int 
+# int
 $sender->addData($defined_hostname, 'custom.int1', '99', '1234567890'); #with timestamp
 $sender->addData($defined_hostname, 'custom.int1', intval('2'));
 $sender->addData($defined_hostname, 'custom.int1', '1');
-# float 
+# float
 $sender->addData($defined_hostname, 'custom.float1', strval('3.14')); # store 3.14
 $sender->addData($defined_hostname, 'custom.float1', floatval('3.24')); # store 3
 $sender->addData($defined_hostname, 'custom.float1', '6.14');
-# text  
+# text
 $sender->addData($defined_hostname, 'custom.text1', 'text1');
 $sender->addData($defined_hostname, 'custom.text1', 'text2');
-# log  
+# log
 $sender->addData($defined_hostname, 'custom.log1', 'log1');
 $sender->addData($defined_hostname, 'custom.log1', 'log2');
 
@@ -56,7 +56,7 @@ if ($result) {
 
 
 /*
-    method chain pattern
+ * method chain pattern
  */
 $sender = new \Net\Zabbix\Sender();
 $result = $sender
