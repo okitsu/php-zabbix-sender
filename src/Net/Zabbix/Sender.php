@@ -111,20 +111,14 @@ class Sender {
                                     ) 
                                 );
         $json_length = strlen($json_data);
-        $data_header = pack("aaaaCCCCCCCCC",
+        $data_header = pack("aaaaCV2",
                                 substr($this->_protocolHeaderString,0,1),
                                 substr($this->_protocolHeaderString,1,1),
                                 substr($this->_protocolHeaderString,2,1),
                                 substr($this->_protocolHeaderString,3,1),
                                 intval($this->_protocolVersion),
-                                ($json_length & 0xFF),
-                                ($json_length & 0x00FF)>>8,
-                                ($json_length & 0x0000FF)>>16,
-                                ($json_length & 0x000000FF)>>24,
-                                0x00,
-                                0x00,
-                                0x00,
-                                0x00
+                                $json_length,
+                                ($json_length >> 32)
                             );
         return ($data_header . $json_data);
     }
