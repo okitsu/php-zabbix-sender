@@ -7,10 +7,12 @@ use Net\Zabbix\Exception\SenderProtocolException;
 
 class Sender {
 
+    private $_serversList;
+
     private $_servername;
     private $_serverport;
 
-    private $_timeout = 30;
+    private $_timeout = 5;
 
     private $_protocolHeaderString = 'ZBXD';
     private $_protocolVersion      = 1;
@@ -32,9 +34,9 @@ class Sender {
      * @param  integer $serverport
      * @return void
      */
-    function __construct($servername = 'localhost', $serverport = 10051)
+    function __construct($serverslist = 'localhost', $serverport = 10051)
     {
-        $this->setServerName($servername);
+        $this->setServerName($serverslist);
         $this->setServerPort($serverport);
         $this->initData();
     }
@@ -54,8 +56,9 @@ class Sender {
         return $this;
     }
     
-    function setServerName($servername){
-        $this->_servername = $servername;
+    function setServerName($serverslist){
+        $this->_serversList = explode(",",$serverslist);
+        $this->_servername = array_shift($this->_serversList);
         return $this;
     }
     
@@ -195,7 +198,12 @@ class Sender {
                                         $errmsg,
                                         $this->_timeout);
         if(! $this->_socket){
-            throw new SenderNetworkException(sprintf('%s,%s',$errno,$errmsg));
+            if (count($this->_serversList)>0){
+                $this->_servername  = array_shift($this->_serversList);
+                $this->_connect();
+            }else{
+                throw new SenderNetworkException(sprintf('%s,%s',$errno,$errmsg));
+            }
         }
     }
     
