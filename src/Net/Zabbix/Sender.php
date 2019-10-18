@@ -224,22 +224,36 @@ class Sender {
 
     /**
      * read data from socket
-     * @throws Net\Zabbix\Exception\SenderNetworkException
-     *
-     */ 
-    private function _read($socket){
-        if(! $socket){
+     * @param $socket
+     * @return bool|string
+     */
+    private function _read($socket) {
+        if (!$socket) {
             throw new SenderNetworkException('socket was not readable,connect failed.');
         }
-        $recvData = "";
-        while(!feof($socket)){
-            $buffer = fread($socket,8192);
-            if($buffer === false){
-                return false; 
+
+        stream_set_timeout($socket, $this->_timeout);
+
+        $recvData = '';
+
+        while (!feof($socket)) {
+            $buffer = fread($socket, 8192);
+            if ($buffer === false) {
+                return false;
             }
+
+            if ($buffer === '') {
+                // Check for timeout
+                $metaData = stream_get_meta_data($socket);
+                if ($metaData['timed_out'] === true) {
+                    return false;
+                }
+            }
+
             $recvData .= $buffer;
         }
-        return $recvData; 
+
+        return $recvData;
     }
     
 
